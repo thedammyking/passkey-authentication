@@ -19,7 +19,7 @@ const FORM_DEFAULT_VALUES: FormValues = {
   email: "",
 };
 
-export function AuthForm() {
+export default function AuthForm() {
   const {
     register,
     handleSubmit,
