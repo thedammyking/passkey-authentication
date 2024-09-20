@@ -41,14 +41,17 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+  // callbacks: {
+  //   session: ({ session, user }) => ({
+  //     ...session,
+  //     user: {
+  //       ...session.user,
+  //       id: user.id,
+  //     },
+  //   }),
+  // },
+  session: {
+    strategy: "jwt",
   },
   adapter: DrizzleAdapter(db, {
     usersTable: users,
@@ -57,7 +60,13 @@ export const authOptions: NextAuthOptions = {
     verificationTokensTable: verificationTokens,
   }) as Adapter,
   providers: [],
-  pages: {},
+  pages: {
+    signIn: "/get-started",
+    signOut: "/get-started",
+    error: "/get-started",
+    verifyRequest: "/get-started/verify",
+    newUser: "/get-started",
+  },
 };
 
 /**
