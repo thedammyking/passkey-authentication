@@ -8,6 +8,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import { isUserRegistered } from "@/app/actions";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -30,7 +31,11 @@ export default function AuthForm() {
     defaultValues: FORM_DEFAULT_VALUES,
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    const { email } = data;
+    const isRegistered = await isUserRegistered(email);
+    console.log("isRegistered", isRegistered);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
