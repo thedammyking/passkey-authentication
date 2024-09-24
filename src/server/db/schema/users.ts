@@ -1,12 +1,23 @@
 import { createTable } from "@/lib/utils";
 import { sql } from "drizzle-orm";
-import { uuid, varchar, uniqueIndex, timestamp } from "drizzle-orm/pg-core";
+import {
+  uuid,
+  varchar,
+  uniqueIndex,
+  timestamp,
+  date,
+} from "drizzle-orm/pg-core";
 
 export const users = createTable(
   "user",
   {
     id: uuid("id").unique().primaryKey().defaultRandom(),
-    name: varchar("name", { length: 255 }),
+    firstname: varchar("firstname", { length: 255 }),
+    lastname: varchar("lastname", { length: 255 }),
+    gender: varchar("gender", { length: 255 }),
+    birthdate: date("birthdate"),
+    profilePicture: varchar("profile_picture", { length: 255 }),
+    bio: varchar("bio", { length: 255 }),
     email: varchar("email", { length: 255 }).unique().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
@@ -19,3 +30,5 @@ export const users = createTable(
     emailIndex: uniqueIndex("email_idx").on(user.email),
   }),
 );
+
+export type User = typeof users.$inferSelect;

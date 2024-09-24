@@ -8,7 +8,12 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { isUserRegistered } from "@/app/actions";
+import { generateOptions, verifyAttestationResponse } from "@/app/actions";
+import {
+  startRegistration,
+  startAuthentication,
+} from "@simplewebauthn/browser";
+import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -24,7 +29,7 @@ export default function AuthForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     mode: "all",
     resolver: zodResolver(formSchema),
@@ -32,9 +37,34 @@ export default function AuthForm() {
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const { email } = data;
-    const isRegistered = await isUserRegistered(email);
-    console.log("isRegistered", isRegistered);
+    try {
+      const { email } = data;
+      const { data: optionsResponse, error: optionsError } =
+        await generateOptions(email);
+
+      if (optionsError || !optionsResponse) throw new Error(optionsError);
+
+      const { options, isNewUser } = optionsResponse;
+
+      let attResp;
+      if (isNewUser) {
+        attResp = await startRegistration(
+          options as PublicKeyCredentialCreationOptionsJSON,
+        );
+      } else {
+        attResp = await startAuthentication(options);
+      }
+
+      const { data: verificationResponse, error: verificationError } =
+        await verifyAttestationResponse(email, attResp);
+
+      if (verificationError || !verificationResponse)
+        throw new Error(verificationError);
+
+      console.log("verificationResponse", verificationResponse);
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (
@@ -62,8 +92,9 @@ export default function AuthForm() {
         variant="outline"
         className="min-h-12 w-full rounded-md bg-neutral-900"
         type="submit"
+        disabled={isSubmitting}
       >
-        Get Started
+        {isSubmitting ? "Loading..." : "Get Started"}
       </Button>
     </form>
   );

@@ -1,6 +1,11 @@
+import type {
+  AuthenticationResponseJSON,
+  RegistrationResponseJSON,
+} from "@simplewebauthn/types";
 import { clsx, type ClassValue } from "clsx";
 import { customType, pgTableCreator } from "drizzle-orm/pg-core";
 import { twMerge } from "tailwind-merge";
+import { z } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,22 +22,26 @@ export const createTable = pgTableCreator(
 );
 
 export const bytea = customType<{
-  data: string;
+  data: Uint8Array;
+  driverData: Buffer;
   notNull: false;
   default: false;
 }>({
   dataType() {
     return "bytea";
   },
-  toDriver(val: string) {
-    let newVal = val;
-    if (val.startsWith("0x")) {
-      newVal = val.slice(2);
-    }
-
-    return Buffer.from(newVal, "hex");
+  toDriver(val: Uint8Array) {
+    // Convert Uint8Array to Buffer
+    return Buffer.from(val);
   },
-  fromDriver(val: unknown) {
-    return (val as Buffer).toString("hex");
+  fromDriver(val: Buffer) {
+    // Convert Buffer to Uint8Array
+    return new Uint8Array(val);
   },
 });
+
+export const getPasskeyVerificationInputSchema = <T>() =>
+  z.object({
+    email: z.string().email(),
+    attestationResponse: z.any() as z.ZodType<T>,
+  });

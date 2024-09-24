@@ -4,6 +4,7 @@ import { env } from "@/env";
 
 export default {
   schema: "./src/server/db/schema",
+  out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
     url: env.DATABASE_URL,
