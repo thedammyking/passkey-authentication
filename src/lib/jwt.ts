@@ -5,10 +5,10 @@ import type { Secret, SignOptions } from "jsonwebtoken";
 class Jwt {
   private secret: Secret;
   constructor() {
-    if (!env.NEXTAUTH_SECRET) {
-      throw new Error("NEXTAUTH_SECRET is not set");
+    if (!env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not set");
     }
-    this.secret = env.NEXTAUTH_SECRET;
+    this.secret = env.JWT_SECRET;
   }
 
   public encode<T extends object>(payload: T, options?: SignOptions) {
