@@ -11,10 +11,6 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    JWT_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
     RP_ID: z.string(),
     RP_ORIGIN: z.string().url(),
     RP_NAME: z.string(),
@@ -38,7 +34,6 @@ export const env = createEnv({
   runtimeEnv: {
     POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
-    JWT_SECRET: process.env.JWT_SECRET,
     RP_ID: process.env.RP_ID,
     RP_ORIGIN: process.env.RP_ORIGIN,
     RP_NAME: process.env.RP_NAME,
