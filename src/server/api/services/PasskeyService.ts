@@ -165,7 +165,7 @@ export class PasskeyService {
     return { data: { verified: true, user } };
   }
 
-  async createNewPasskey(
+  private async createNewPasskey(
     user: User,
     input: NewUserVerificationInput,
     credentialOptions: PublicKeyCredentialCreationOptionsJSON,
@@ -185,7 +185,7 @@ export class PasskeyService {
     });
   }
 
-  async updatePasskeyCounter(
+  private async updatePasskeyCounter(
     input: ExistingUserVerificationInput,
     verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>,
   ): Promise<void> {
