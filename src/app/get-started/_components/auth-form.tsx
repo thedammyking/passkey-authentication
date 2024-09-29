@@ -31,6 +31,7 @@ export default function AuthForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setError,
   } = useForm<FormValues>({
     mode: "all",
     resolver: zodResolver(formSchema),
@@ -42,32 +43,36 @@ export default function AuthForm() {
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       const { email } = data;
-      const { data: optionsResponse, error: optionsError } =
-        await generateOptions(email);
-
-      if (optionsError || !optionsResponse) throw new Error(optionsError);
-
-      const { options, isNewUser } = optionsResponse;
-
-      let attResp;
-      if (isNewUser) {
-        attResp = await startRegistration(
-          options as PublicKeyCredentialCreationOptionsJSON,
-        );
-      } else {
-        attResp = await startAuthentication(options);
+      const optionsResponse = await generateOptions(email);
+      if (!optionsResponse.data) {
+        throw new Error(optionsResponse.error ?? "Failed to generate options");
       }
 
-      const { data: verificationResponse, error: verificationError } =
-        await verifyAttestationResponse(email, attResp);
+      const { options, isNewUser } = optionsResponse.data;
+      const attResp = isNewUser
+        ? await startRegistration(
+            options as PublicKeyCredentialCreationOptionsJSON,
+          )
+        : await startAuthentication(options);
 
-      if (verificationError || !verificationResponse)
-        throw new Error(verificationError);
-      if (verificationResponse.verified) {
+      const verificationResponse = await verifyAttestationResponse(
+        email,
+        attResp,
+      );
+      if (!verificationResponse.data) {
+        throw new Error(verificationResponse.error ?? "Verification failed");
+      }
+
+      if (verificationResponse.data.verified) {
         void router.push("/");
+      } else {
+        throw new Error("Verification unsuccessful");
       }
     } catch (error) {
-      throw error;
+      setError("root", {
+        type: "manual",
+        message: error instanceof Error ? error.message : "An error occurred",
+      });
     }
   };
 
@@ -92,14 +97,21 @@ export default function AuthForm() {
           </span>
         )}
       </div>
+
       <Button
         variant="outline"
-        className="min-h-12 w-full rounded-md bg-neutral-900"
+        className="min-h-12 w-full rounded-md bg-neutral-900 text-white"
         type="submit"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Loading..." : "Get Started"}
       </Button>
+
+      {errors.root && (
+        <span className="mt-10 text-sm text-red-500">
+          {errors.root.message}
+        </span>
+      )}
     </form>
   );
 }
