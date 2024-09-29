@@ -7,7 +7,7 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.DATABASE_URL,
+    url: env.POSTGRES_URL,
   },
   tablesFilter: ["passkey-authentication_*"],
 } satisfies Config;
