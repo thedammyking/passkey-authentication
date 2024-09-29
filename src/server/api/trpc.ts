@@ -7,11 +7,17 @@
  * need to use are documented accordingly near the end.
  */
 
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
+
+import { eq } from "drizzle-orm";
+import { type User, users } from "../db/schema";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+import { SESSION_OPTIONS } from "@/lib/constants";
 
 /**
  * 1. CONTEXT
@@ -118,14 +124,28 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
-  .use(({ next }) => {
-    // if (!ctx.session || !ctx.session.user) {
-    //   throw new TRPCError({ code: "UNAUTHORIZED" });
-    // }
+  .use(async ({ next, ...rest }) => {
+    const session = await getIronSession<{ user: User }>(
+      cookies(),
+      SESSION_OPTIONS,
+    );
+
+    if (!session.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+    });
+
+    if (!user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
     return next({
       ctx: {
-        // infers the `session` as non-nullable
-        // session: { ...ctx.session, user: ctx.session.user },
+        ...rest,
+        session: { ...session, user },
       },
     });
   });

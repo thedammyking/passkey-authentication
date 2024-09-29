@@ -14,6 +14,7 @@ import {
   startAuthentication,
 } from "@simplewebauthn/browser";
 import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -35,6 +36,8 @@ export default function AuthForm() {
     resolver: zodResolver(formSchema),
     defaultValues: FORM_DEFAULT_VALUES,
   });
+
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
@@ -60,8 +63,9 @@ export default function AuthForm() {
 
       if (verificationError || !verificationResponse)
         throw new Error(verificationError);
-
-      console.log("verificationResponse", verificationResponse);
+      if (verificationResponse.verified) {
+        void router.push("/");
+      }
     } catch (error) {
       throw error;
     }

@@ -15,6 +15,11 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
+    RP_ID: z.string(),
+    RP_ORIGIN: z.string().url(),
+    RP_NAME: z.string(),
+    COOKIE_NAME: z.string(),
+    COOKIE_PASSWORD: z.string(),
   },
 
   /**
@@ -34,6 +39,11 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     JWT_SECRET: process.env.JWT_SECRET,
+    RP_ID: process.env.RP_ID,
+    RP_ORIGIN: process.env.RP_ORIGIN,
+    RP_NAME: process.env.RP_NAME,
+    COOKIE_NAME: process.env.COOKIE_NAME,
+    COOKIE_PASSWORD: process.env.COOKIE_PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

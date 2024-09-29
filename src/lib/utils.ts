@@ -1,7 +1,3 @@
-import type {
-  AuthenticationResponseJSON,
-  RegistrationResponseJSON,
-} from "@simplewebauthn/types";
 import { clsx, type ClassValue } from "clsx";
 import { customType, pgTableCreator } from "drizzle-orm/pg-core";
 import { twMerge } from "tailwind-merge";

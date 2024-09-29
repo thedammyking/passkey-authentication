@@ -1,4 +1,5 @@
 import type { getPasskeyVerificationInputSchema } from "@/lib/utils";
+import type { User } from "@/server/db/schema";
 import type {
   AuthenticationResponseJSON,
   PublicKeyCredentialCreationOptionsJSON,
@@ -27,8 +28,8 @@ export type GenerateOptionsResponse = ApiResponse<{
 }>;
 
 export type VerifyResponse = ApiResponse<{
-  verificationToken: string;
   verified: boolean;
+  user: User;
 }>;
 
 export type NewUserVerificationInput = z.infer<
