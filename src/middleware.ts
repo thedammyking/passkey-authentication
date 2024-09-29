@@ -11,7 +11,6 @@ export default async function middleware(req: NextRequest) {
   // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isAuthRoute = authRoutes.includes(path);
-  console.log("isAuthRoute", isAuthRoute);
 
   const session = await getIronSession<{ user: User }>(
     cookies(),

@@ -53,7 +53,7 @@ export default async function Home() {
                   <span>Logged in as {session.user?.email}</span>
                 )}
               </p>
-              <LogoutButton session={session} />
+              <LogoutButton isLoggedIn={!!session.user} />
             </div>
           </div>
 
