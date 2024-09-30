@@ -1,29 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/prefer-optional-chain */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/types";
-import TempStore from "@/lib/temp-store";
 import type {
   ExistingUserVerificationInput,
   GenerateOptionsResponse,
   NewUserVerificationInput,
-  PublicKeyCredentialOptions,
   VerifyResponse,
 } from "@/types";
 import { getPasskeyVerificationInputSchema } from "@/lib/utils";
 import { PasskeyService } from "@/server/api/services/PasskeyService";
 import { UserService } from "@/server/api/services/UserService";
-
-const publicKeyCredentialOptionsStore =
-  new TempStore<PublicKeyCredentialOptions>();
 
 export const passkeyRouter = createTRPCRouter({
   generateOptions: publicProcedure
@@ -36,7 +25,8 @@ export const passkeyRouter = createTRPCRouter({
         const options = await passkeyService.generateOptions(input.email);
         const isNewUser = await userService.isNewUser(input.email);
 
-        publicKeyCredentialOptionsStore.set(input.email, options);
+        ctx.session.credentialOptions = options;
+        await ctx.session.save();
 
         return { data: { options, isNewUser } };
       } catch (error) {
@@ -55,9 +45,8 @@ export const passkeyRouter = createTRPCRouter({
         const userService = new UserService(ctx.db);
         const passkeyService = new PasskeyService(ctx.db, userService);
 
-        const credentialOptions = publicKeyCredentialOptionsStore.get(
-          input.email,
-        );
+        const credentialOptions = ctx.session.credentialOptions;
+
         if (!credentialOptions) {
           return { error: "Authentication failed" };
         }
@@ -67,7 +56,9 @@ export const passkeyRouter = createTRPCRouter({
           credentialOptions,
         );
 
-        publicKeyCredentialOptionsStore.remove(input.email);
+        ctx.session.credentialOptions = null;
+        ctx.session.user = result.data?.user ?? null;
+        await ctx.session.save();
 
         return result;
       } catch (error) {

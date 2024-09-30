@@ -18,6 +18,7 @@ import { type User, users } from "../db/schema";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { SESSION_OPTIONS } from "@/lib/constants";
+import type { Session } from "@/types";
 
 /**
  * 1. CONTEXT
@@ -31,7 +32,10 @@ import { SESSION_OPTIONS } from "@/lib/constants";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+  session: Session;
+}) => {
   return {
     db,
     ...opts,

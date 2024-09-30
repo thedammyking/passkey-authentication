@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { logout } from "../actions";
+
 import { useRouter } from "next/navigation";
+import { logout } from "../actions";
 
 interface LogoutButtonProps {
   isLoggedIn: boolean;

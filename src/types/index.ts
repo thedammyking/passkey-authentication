@@ -6,6 +6,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/types";
+import { IronSession } from "iron-session";
 import type { z } from "zod";
 
 export type ApiResponse<T> =
@@ -41,3 +42,10 @@ export type ExistingUserVerificationInput = z.infer<
     typeof getPasskeyVerificationInputSchema<AuthenticationResponseJSON>
   >
 >;
+
+export type SessionData = {
+  user: User | null;
+  credentialOptions: PublicKeyCredentialOptions | null;
+};
+
+export type Session = IronSession<SessionData>;
